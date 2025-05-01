@@ -1,81 +1,16 @@
-const express = require('express')
-const mysql =require('mysql')
-const cors = require('cors')
-const path = require('path')
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import partsRoutes from './routes/parts.js';
 
+dotenv.config();
+const app = express();
 
-const app = express()
+app.use(cors());
+app.use(express.json());
 
-app.use(express.static(path.join(__dirname, "public")))
-app.use(cors())
-app.use(express.json())
+app.use('/api/parts', partsRoutes);
 
-const port = 5000
-
-const db =mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "ccb2b"
-})
-
-
-app.post("/add_user", (req, res) => {
-    const sql =
-      "INSERT INTO users (`name`,`email`,`admin`) VALUES (?, ?, ?)";
-    const values = [req.body.name, req.body.email, req.body.admin];
-    db.query(sql, values, (err, result) => {
-      if (err)
-        return res.json({ message: "Something unexpected has occured" + err });
-      return res.json({ success: "Student added successfully" });
-    });
-  });
-  
-  app.get("/students", (req, res) => {
-    const sql = "SELECT * FROM users";
-    db.query(sql, (err, result) => {
-      if (err) res.json({ message: "Server error" });
-      return res.json(result);
-    });
-  });
-  
-  app.get("/get_student/:id", (req, res) => {
-    const id = req.params.id;
-    const sql = "SELECT * FROM users WHERE `id`= ?";
-    db.query(sql, [id], (err, result) => {
-      if (err) res.json({ message: "Server error" });
-      return res.json(result);
-    });
-  });
-  
-  app.post("/edit_user/:id", (req, res) => {
-    const id = req.params.id;
-    const sql =
-      "UPDATE users SET `name`=?, `email`=?, `admin`=?=? WHERE id=?";
-    const values = [
-      req.body.name,
-      req.body.email,
-      req.body.admin,
-      id,
-    ];
-    db.query(sql, values, (err, result) => {
-      if (err)
-        return res.json({ message: "Something unexpected has occured" + err });
-      return res.json({ success: "Student updated successfully" });
-    });
-  });
-  
-  app.delete("/delete/:id", (req, res) => {
-    const id = req.params.id;
-    const sql = "DELETE FROM users WHERE id=?";
-    const values = [id];
-    db.query(sql, values, (err, result) => {
-      if (err)
-        return res.json({ message: "Something unexpected has occured" + err });
-      return res.json({ success: "Student updated successfully" });
-    });
-  });
-
-app.listen(port,()=>{
-    console.log('listening')
-})
+app.listen(process.env.PORT, () => {
+  console.log(`Server running on http://localhost:${process.env.PORT}`);
+});
